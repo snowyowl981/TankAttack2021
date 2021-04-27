@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityStandardAssets.Utility;
 
 public class TankCtrl : MonoBehaviour
 {
@@ -18,7 +19,15 @@ public class TankCtrl : MonoBehaviour
         tankTr = GetComponent<Transform>();
         pv = GetComponent<PhotonView>();
         // 무게중심
-        GetComponent<Rigidbody>().centerOfMass = new Vector3(0, -5.0f, 0);
+        if(pv.IsMine)
+        {
+            Camera.main.GetComponent<SmoothFollow>().target = transform.Find("CamPivot").transform;
+            GetComponent<Rigidbody>().centerOfMass = new Vector3(0, -5.0f, 0);
+        }
+        else
+        {
+            GetComponent<Rigidbody>().isKinematic = true;
+        }
     }
 
     // Update is called once per frame
