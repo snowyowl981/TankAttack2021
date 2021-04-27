@@ -5,32 +5,51 @@ using Photon.Pun;
 using Photon.Realtime;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
     // 서로 다른 버전이 같이 플레이 할 경우 버그 발생 가능성 있음
     // 1.0 버전은 1.0 버전끼리 매칭
     private readonly string gameVersion = "v1.0";
-    private string UserId = "SnowyOwl";
+    private string userId = "SnowyOwl";
 
-    public TMP_InputField userId;
-    public TMP_InputField roomName;
+    public TMP_InputField userIdText;
+    public TMP_InputField roomNameText;
 
     void Awake()
     {   
+        // 자동으로 씬 로딩
+        PhotonNetwork.AutomaticallySyncScene = true;
+
         // 게임 버전 지정
         PhotonNetwork.GameVersion = gameVersion;
 
         // 닉네임 지정
-        PhotonNetwork.NickName = UserId;
+        //PhotonNetwork.NickName = userId;
 
         // 서버접속(UsingSettings는 가장 빠른 서버)
         PhotonNetwork.ConnectUsingSettings();
     }
+
+    void Start()
+    {
+        userId = PlayerPrefs.GetString("USER_ID", $"USER_{Random.Range(0, 100):00}");
+        userIdText.text = userId;
+        PhotonNetwork.NickName = userId;
+    }
+
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected to Photon Server");
-        PhotonNetwork.JoinRandomRoom(); // 랜덤한 방 접속
+        // PhotonNetwork.JoinRandomRoom(); // 랜덤한 방 접속
+
+        PhotonNetwork.JoinLobby();
+    }
+
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("Joinned Lobby");
     }
 
     public override void OnJoinRandomFailed(short returnCode, string message)
@@ -59,8 +78,25 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         Debug.Log("방 입장 완료");
         Debug.Log(PhotonNetwork.CurrentRoom.Name);
 
+        if(PhotonNetwork.IsMasterClient)
+        {
+            PhotonNetwork.LoadLevel("BattleField");
+        }
+
         // 통신이 가능한 주인공 캐릭터(탱크) 생성
-        PhotonNetwork.Instantiate("Tank", new Vector3(0, 5.0f, 0), Quaternion.identity, 0);
+        //PhotonNetwork.Instantiate("Tank", new Vector3(0, 5.0f, 0), Quaternion.identity, 0);
     }
 
+    public void OnLoginClick()
+    {
+        if(string.IsNullOrEmpty(userIdText.text))
+        {
+            userId = $"USER_{Random.Range(0, 100):00}";
+            userIdText.text = userId;
+        }
+
+        PlayerPrefs.SetString("USER_ID", userIdText.text);
+        PhotonNetwork.NickName = userIdText.text;
+        PhotonNetwork.JoinRandomRoom();
+    }
 }
