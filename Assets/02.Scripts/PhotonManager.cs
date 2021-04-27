@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
+using UnityEngine.UI;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -10,6 +12,9 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     // 1.0 버전은 1.0 버전끼리 매칭
     private readonly string gameVersion = "v1.0";
     private string UserId = "SnowyOwl";
+
+    public TMP_InputField userId;
+    public TMP_InputField roomName;
 
     void Awake()
     {   
@@ -31,7 +36,15 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
         Debug.Log($"code = {returnCode}, msg = {message}"); // 입장 실패
-        PhotonNetwork.CreateRoom("My Room");
+
+        // 룸 옵션 설정
+        RoomOptions ro = new RoomOptions();
+        ro.IsOpen = true;
+        ro.IsVisible = true;
+        ro.MaxPlayers = 30;
+
+        // 룸을 생성
+        PhotonNetwork.CreateRoom("My Room", ro);
     }
 
     // 방 생성 완료 콜백
