@@ -21,5 +21,7 @@ public class Cannon : MonoBehaviour
     {
             GameObject exp = Instantiate(expEffect, transform.position, Quaternion.identity);
             Destroy(exp, 1f);
+
+            Destroy(this.gameObject);
     }
 }

@@ -25,6 +25,7 @@ public class Damage : MonoBehaviour
             {
                 StartCoroutine(TankDestroy(shooter));
             }
+           // Destroy(coll.gameObject);
         }
     }
 
