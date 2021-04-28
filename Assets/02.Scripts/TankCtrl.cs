@@ -20,11 +20,14 @@ public class TankCtrl : MonoBehaviour
     [SerializeField]
     private Transform firePos;
     public Transform cannonMesh;
+    private new AudioSource audio;
+    public AudioClip cannonFireSfx;
     // Start is called before the first frame update
     void Start()
     {
         tankTr = GetComponent<Transform>();
         pv = GetComponent<PhotonView>();
+        audio = GetComponent<AudioSource>();
 
         // 무게중심
         if(pv.IsMine)
@@ -53,7 +56,7 @@ public class TankCtrl : MonoBehaviour
             // 포탄 발사 로직
             if(Input.GetMouseButtonDown(0))
             {
-                pv.RPC("Fire", RpcTarget.AllViaServer, null);
+                pv.RPC("Fire", RpcTarget.AllViaServer, pv.Owner.NickName);
             }
 
             // 포신 회전
@@ -64,8 +67,10 @@ public class TankCtrl : MonoBehaviour
 
 
     [PunRPC]
-    void Fire()
+    void Fire(string shooterName)
     {
-        Instantiate(cannonPrefab, firePos.position, firePos.rotation);
+        GameObject _cannon =  Instantiate(cannonPrefab, firePos.position, firePos.rotation);
+        audio?.PlayOneShot(cannonFireSfx); // 혹은 Awake영역으로 올릴 것
+        _cannon.GetComponent<Cannon>().shooter = shooterName;
     }
 }

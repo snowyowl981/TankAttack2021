@@ -11,12 +11,18 @@ public class GameManager : MonoBehaviourPunCallbacks
 {
     public TMP_Text roomNameText;
     public TMP_Text connectInfoText;
+    public TMP_Text messageText;
+
     public Button exitButton;
+
+    // 싱글턴 변수
+    public static GameManager instance = null;
 
     void Awake()
     {   
+        instance = this;
         // PhotonNetwork.IsMessageQueueRunning = true;
-        Vector3 pos = new Vector3(Random.Range(-200f, 200f), 5.0f, Random.Range(-130f, 130f));
+        Vector3 pos = new Vector3(Random.Range(-200f, 200f), 5.0f, Random.Range(-100f, 100f));
 
         // 주인공 탱크 생성
         PhotonNetwork.Instantiate("Tank", pos, Quaternion.identity, 0);
@@ -49,10 +55,15 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         SetRoomInfo();
+        string msg = $"\n<color=#00ff00>{newPlayer.NickName}</color> is joined";
+        // 메시지가 계속 남아있으므로 누적해서 넣어줌(+=)
+        messageText.text += msg;
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         SetRoomInfo();
+        string msg = $"\n<color=#ff0000>{otherPlayer.NickName}</color> is joined";
+        messageText.text += msg;
     }
 }
