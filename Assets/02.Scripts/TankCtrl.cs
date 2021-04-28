@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityStandardAssets.Utility;
+using TMPro;
 
 public class TankCtrl : MonoBehaviour
 {
@@ -17,17 +18,25 @@ public class TankCtrl : MonoBehaviour
     private Transform tankTr;
     private PhotonView pv;
     public GameObject cannonPrefab;
+
     [SerializeField]
     private Transform firePos;
+
     public Transform cannonMesh;
+    
     private new AudioSource audio;
     public AudioClip cannonFireSfx;
+
+    public TMPro.TMP_Text userIdText;
+
     // Start is called before the first frame update
     void Start()
     {
         tankTr = GetComponent<Transform>();
         pv = GetComponent<PhotonView>();
         audio = GetComponent<AudioSource>();
+
+        userIdText.text = pv.Owner.NickName;
 
         // 무게중심
         if(pv.IsMine)
