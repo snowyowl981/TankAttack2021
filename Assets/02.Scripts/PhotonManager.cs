@@ -131,7 +131,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 {
                     GameObject _room = Instantiate(roomPrefab, scrollContent);
                     // 룸 정보 
-                    _room.GetComponentInChildren<TMP_Text>().text = room.Name;
+                    _room.GetComponent<RoomData>().RoomInfo = room;
                     // 딕셔너리에 저장
                     roomDict.Add(room.Name, _room);
                 }
@@ -139,7 +139,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
                 {
                     // 룸 정보를 갱신
                     roomDict.TryGetValue(room.Name, out tempRoom);
-                    tempRoom.GetComponentInChildren<TMP_Text>().text = room.Name;
+                    tempRoom.GetComponent<RoomData>().RoomInfo = room;
                 }
             }
         }
