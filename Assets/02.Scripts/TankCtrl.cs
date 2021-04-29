@@ -5,7 +5,7 @@ using Photon.Pun;
 using UnityStandardAssets.Utility;
 using TMPro;
 
-public class TankCtrl : MonoBehaviour
+public class TankCtrl : MonoBehaviour, IPunObservable
 {
     [SerializeField]
     private float moveSpeed;
@@ -72,6 +72,18 @@ public class TankCtrl : MonoBehaviour
             float r = Input.GetAxis("Mouse ScrollWheel");
             cannonMesh.Rotate(Vector3.right * Time.deltaTime * r * cannonRoatationSpeed);
         }
+        else
+        {
+            if((tankTr.position - receivePos).sqrMagnitude > 3.0f * 3.0f)
+            {
+                tankTr.position = receivePos;
+            }
+            else
+            {
+                tankTr.position = Vector3.Lerp(tankTr.position, receivePos, Time.deltaTime * 10f);
+            }
+            tankTr.rotation = Quaternion.Slerp(tankTr.rotation, receiveRot, Time.deltaTime * 10f);
+        }
     }
 
 
@@ -81,5 +93,23 @@ public class TankCtrl : MonoBehaviour
         GameObject _cannon =  Instantiate(cannonPrefab, firePos.position, firePos.rotation);
         audio?.PlayOneShot(cannonFireSfx); // 혹은 Awake영역으로 올릴 것
         _cannon.GetComponent<Cannon>().shooter = shooterName;
+    }
+
+    Vector3 receivePos = Vector3.zero;
+    Quaternion receiveRot = Quaternion.identity; 
+
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if(stream.IsWriting) // PhotonView.IsMine == true;
+        {
+            stream.SendNext(tankTr.position);   // 위치
+            stream.SendNext(tankTr.rotation);   // 회전값
+        }
+        else
+        {
+            // 두번 보내서 두번 받음
+            receivePos = (Vector3)stream.ReceiveNext();
+            receiveRot = (Quaternion)stream.ReceiveNext();
+        }
     }
 }

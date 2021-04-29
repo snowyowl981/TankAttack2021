@@ -9,11 +9,18 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
+    [Header("Room Info")]
     public TMP_Text roomNameText;
     public TMP_Text connectInfoText;
     public TMP_Text messageText;
 
+    [Header("Chatting UI")]
+    public TMP_Text chatListText;
+    public TMP_InputField msgIF;
+
     public Button exitButton;
+
+    private PhotonView pv;
 
     // 싱글턴 변수
     public static GameManager instance = null;
@@ -30,6 +37,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     void Start()
     {
+        pv = GetComponent<PhotonView>();
+        pv = photonView;
         SetRoomInfo();
     }
 
@@ -63,7 +72,19 @@ public class GameManager : MonoBehaviourPunCallbacks
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         SetRoomInfo();
-        string msg = $"\n<color=#ff0000>{otherPlayer.NickName}</color> is joined";
+        string msg = $"\n<color=#ff0000>{otherPlayer.NickName}</color> is leaved";
         messageText.text += msg;
+    }
+
+    public void OnSendClick()
+    {   
+        string _msg = $"<color=#00ff00>[{PhotonNetwork.NickName}]</color> {msgIF.text}";
+        pv.RPC("SendChatMessage", RpcTarget.AllBufferedViaServer, _msg);
+    }
+
+    [PunRPC]
+    void SendChatMessage(string msg)
+    {
+        chatListText.text += $"{msg}\n";
     }
 }
