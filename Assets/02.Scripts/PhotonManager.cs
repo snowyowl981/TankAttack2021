@@ -17,6 +17,14 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public TMP_InputField userIdText;
     public TMP_InputField roomNameText;
 
+    // 룸 목록 저장을 위한 자료형
+    private Dictionary<string, GameObject> roomDict = new Dictionary<string, GameObject>();
+
+    // 룸을 표시할 프리팹
+    public GameObject roomPrefab;
+
+    // Room 프리팹이 차일드화 시킬 부모객체
+    public Transform scrollContent;
     void Awake()
     {   
         // 자동으로 씬 로딩
@@ -98,9 +106,42 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     // 룸 목록이 변경(갱신)될때마다 호출
     public override void OnRoomListUpdate(List<RoomInfo> roomList)
     {
+        GameObject tempRoom = null;
+
         foreach(var room in roomList)
         {
-            Debug.Log($"Room = {room.Name}, ({room.PlayerCount}/{room.MaxPlayers})");
+            // Debug.Log($"Room = {room.Name}, ({room.PlayerCount}/{room.MaxPlayers})");
+            // 룸 삭제된 경우 => 
+            if(room.RemovedFromList)
+            {
+                // 딕셔너리에서 삭제, 프리팹 삭제
+                roomDict.TryGetValue(room.Name, out tempRoom);
+
+                // RoomItem 프리팹 삭제
+                Destroy(tempRoom);
+
+                // 딕셔너리에서 데이터 삭제
+                roomDict.Remove(room.Name);
+                
+            }
+            else // 룸 정보가 갱신 또는 변경된 경우
+            {
+                // 처음 생성된 경우 딕셔너리에 데이터 추가 + roomItem 생성
+                if(roomDict.ContainsKey(room.Name) == false)
+                {
+                    GameObject _room = Instantiate(roomPrefab, scrollContent);
+                    // 룸 정보 
+                    _room.GetComponentInChildren<TMP_Text>().text = room.Name;
+                    // 딕셔너리에 저장
+                    roomDict.Add(room.Name, _room);
+                }
+                else
+                {
+                    // 룸 정보를 갱신
+                    roomDict.TryGetValue(room.Name, out tempRoom);
+                    tempRoom.GetComponentInChildren<TMP_Text>().text = room.Name;
+                }
+            }
         }
     }
 
